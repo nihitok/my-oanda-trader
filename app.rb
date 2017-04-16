@@ -65,18 +65,17 @@ class MyTrader < Base
   def run
     return unless tradable?
 
-    order!('USD_JPY', 'buy')
     if long?(granularity: 'M15') && long?(granularity: 'M30') &&
        long?(granularity: 'H1') && long?(granularity: 'H4') &&
        long?(granularity: 'H12') && long?(granularity: 'D')
       order!('USD_JPY', 'buy')
-    end
 
-
-    if short?(granularity: 'M15') && short?(granularity: 'M30') &&
+    elsif short?(granularity: 'M15') && short?(granularity: 'M30') &&
        short?(granularity: 'H1') && short?(granularity: 'H4') &&
        short?(granularity: 'H12') && short?(granularity: 'D')
       order!('USD_JPY', 'sell')
+    else
+      puts '.'
     end
 
   end
@@ -87,7 +86,7 @@ class MyTrader < Base
     direction(options) < -3
   end
 
-  def short?
+  def short?(options)
     direction(options) > 3
   end
 
@@ -160,7 +159,7 @@ end
 
 
 # env   = :live
-env   = :practice
+# env   = :practice
 
-trader = MyTrader.new(ENV['OANDA_TOKEN'], env)
+trader = MyTrader.new(ENV['OANDA_TOKEN'], ENV['OANDA_ENV'].to_sym)
 trader.run
