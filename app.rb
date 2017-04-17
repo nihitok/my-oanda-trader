@@ -63,28 +63,25 @@ end
 class MyTrader < Base
 
   def run
+    @logs = []
+    @logs << "### run #{Time.now}"
     return unless tradable?
-
-    if long?(granularity: 'M15') && long?(granularity: 'M30') &&
-       long?(granularity: 'H1') && long?(granularity: 'H4') &&
-       long?(granularity: 'H12') && long?(granularity: 'D')
+    granularities = ['D', 'H12', 'H4', 'H1', 'M30', 'M15', 'M1']
+    if granularities.map {|i| long?(granularity: i) }.all?
       order!('USD_JPY', 'buy')
-
-    elsif short?(granularity: 'M15') && short?(granularity: 'M30') &&
-       short?(granularity: 'H1') && short?(granularity: 'H4') &&
-       short?(granularity: 'H12') && short?(granularity: 'D')
+    elsif granularities.map {|i| short?(granularity: i) }.all?
       order!('USD_JPY', 'sell')
     else
       # puts '.'
     end
-
+    puts @logs.join(', ')
   end
 
   private
 
   def long?(options)
     _direction = direction(options)
-    puts "granularity: #{options[:granularity]} #{_direction}"
+    @logs << "#{options[:granularity]}: #{_direction}"
     _direction < -3
   end
 
