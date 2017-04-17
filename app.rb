@@ -75,7 +75,7 @@ class MyTrader < Base
        short?(granularity: 'H12') && short?(granularity: 'D')
       order!('USD_JPY', 'sell')
     else
-      puts '.'
+      # puts '.'
     end
 
   end
@@ -83,11 +83,15 @@ class MyTrader < Base
   private
 
   def long?(options)
-    direction(options) < -3
+    _direction = direction(options)
+    puts "granularity: #{options[:granularity]} #{_direction}"
+    _direction < -3
   end
 
   def short?(options)
-    direction(options) > 3
+    _direction = direction(options)
+    # puts "granularity: #{options[:granularity]} #{_direction}"
+    _direction > 3
   end
 
   def direction(options)
