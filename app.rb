@@ -66,7 +66,11 @@ class MyTrader < Base
     @logs = []
     @logs << "### run #{Time.now}"
     return unless tradable?
-    granularities = ['D', 'H12', 'H4', 'H1', 'M30', 'M15', 'M1']
+    granularities = [
+      # 'D', 'H12', 'H4', 'H1', 'M30',
+      'M15', 'M10', 'M3', 'M2', 'M1',
+      'S30', 'S15', 'S10', 'S5',
+    ]
     if granularities.map {|i| long?(granularity: i) }.all?
       order!('USD_JPY', 'buy')
     elsif granularities.map {|i| short?(granularity: i) }.all?
@@ -82,25 +86,29 @@ class MyTrader < Base
   def long?(options)
     _direction = direction(options)
     @logs << "#{options[:granularity]}: #{_direction}"
-    _direction < -3
+    _direction < -2.5
   end
 
   def short?(options)
     _direction = direction(options)
     # puts "granularity: #{options[:granularity]} #{_direction}"
-    _direction > 3
+    _direction > 2.5
   end
 
   def direction(options)
     data = bollinger_band(options)
     if data['std'] < data['s-3']
       -3
+    elsif data['std'] < data['s-25']
+      -2.5
     elsif data['std'] < data['s-2']
       -2
     elsif data['std'] < data['s-1']
       -1
     elsif data['std'] > data['s+3']
       3
+    elsif data['std'] > data['s+25']
+      2.5
     elsif data['std'] > data['s+2']
       2
     elsif data['std'] > data['s+1']
@@ -148,9 +156,11 @@ class MyTrader < Base
       "avg"   => result["#{key}_avg".to_sym],
       "s+1"   => result["#{key}_avg".to_sym] + (result["#{key}_sd".to_sym] * 1),
       "s+2"   => result["#{key}_avg".to_sym] + (result["#{key}_sd".to_sym] * 2),
+      "s+25"  => result["#{key}_avg".to_sym] + (result["#{key}_sd".to_sym] * 2.5),
       "s+3"   => result["#{key}_avg".to_sym] + (result["#{key}_sd".to_sym] * 3),
       "s-1"   => result["#{key}_avg".to_sym] - (result["#{key}_sd".to_sym] * 1),
       "s-2"   => result["#{key}_avg".to_sym] - (result["#{key}_sd".to_sym] * 2),
+      "s-25"  => result["#{key}_avg".to_sym] - (result["#{key}_sd".to_sym] * 2.5),
       "s-3"   => result["#{key}_avg".to_sym] - (result["#{key}_sd".to_sym] * 3),
     }
     data
